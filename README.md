@@ -1,111 +1,87 @@
-<!--
-© Yongzhi Wang, 2025, All Rights Reserved.
--->
-
 # SplitInference 🔐
 
-**Protect inference confidentiality via enclave-based Split Inference on ODML models.**
+A research prototype for protecting inference confidentiality using a multi‑enclave split‑inference architecture over ODML models.
 
-This open‑source research prototype enables secure inference over vision-enabled deep learning models in adversarial edge settings, by splitting inference across trusted enclaves and untrusted execution layers.
+## 🚀 Highlights
 
----
-
-## 🚀 Project Highlights
-
-- **RT 1.1: Key‑management + Secure channel:**  
-  Utilizes a **Quote Enclave** with Remote Attestation to dynamically negotiate **per-app symmetric encryption keys**, enabling confidential communication between each APP and enclave.
-
-- **RT 1.2: Split Inference Architecture:**  
-  Execution is partitioned into **Input**, **Intermediate (Host)**, and **Output** groups; only initial and final layers run inside enclaves—protecting both requests and responses from leakage.
-
-- **Dual-mode Implementation on Keystone:**  
-  - *Native mode*: Entire inference pipeline in C/C++ (MobileNetV1)  
-  - *Hybrid mode*: Python middle layers (with PyTorch/Numpy) + enclave-only input/output layers (MobileViT)
-
-- **Python‑friendly & model‑agnostic:**  
-  The hybrid architecture supports enclave execution of **Python‑based ODML models**, making SplitInference applicable to a wide range of real-world vision models implemented in PyTorch.
-
-- **Strong performance:**  
-  Inference overheads range from **27%–430%**:
-  
-    - MobileNetV1‑0.7‑224 → ~71%  
-    - MobileNetV1‑0.5‑224 → ~133%  
-    - MobileNetV1‑0.25‑224 → ~430%  
-    - MobileViT‑XXS (hybrid) → ~27%  
-
-- **Peer‑reviewed and award‑winning:**  
-  Initial work on RT 1.1 and RT 1.2 prototype was published at **FMEC 2025**, receiving the **Best Paper Award**; design details for full RT 1.2 are under preparation.
+- **Split Inference Architecture:** Model inference layers are partitioned into input, intermediate, and output groups across trusted input/output enclaves and an untrusted host, protecting both inference requests and responses while maintaining performance and generality.
+- **Robust enclave-based key management:** Each app negotiates a unique encryption key with an Enclave using remote attestation, establishing per-app secure channels to enclaves.
+- **Native & Hybrid Implementations on Keystone:** We implemented native (C/C++) and hybrid (Python + enclave C/C++) versions for MobileNetV1 and MobileViT models within the Keystone RISC‑V multi‑enclave TEE.
+- **Strong performance:** Experimental evaluation shows inference overheads in the range of 27%–430%, significantly better than 142%–577% seen in prior work.
+- **Python-friendly:** The hybrid split inference architecture supports PyTorch and NumPy within the enclave, enabling seamless deployment of a wide range of ODML models implemented in Python.
+- **Peer-reviewed:** The prototype work received the **Best Paper Award** at FMEC 2025.
 
 ---
 
 ## 📚 Table of Contents
 
-- [Background](#background)  
-- [Design Overview](#design-overview)  
-- [Implementation Details](#implementation-details)  
-- [Benchmark Results](#benchmark-results)  
-- [Getting Started](#getting-started)  
-- [License & Acknowledgements](#license--acknowledgements)  
+- [Background](#background)
+- [Architecture](#architecture)
+- [Implementation](#implementation)
+- [Benchmarks](#benchmarks)
+- [Getting Started](#getting-started)
+- [License & Acknowledgements](#license--acknowledgements)
 
 ---
 
-## Background
+## Publication
 
-This project addresses **Research Objective 1**: defending against **direct attacks** on both inference requests and responses.  
-- **RT 1.1** introduces secure key negotiation and encrypted channels via a Quote Enclave trusted by Remote Attestation.  
-- **RT 1.2** enables stronger confidentiality protection using a **split‑inference** model across enclaved front/back layers and untrusted host layers.
+Yongzhi Wang, Ahsan Habib, "Protect Data Confidentiality for On-device Machine Learning through Split Inference", The 10th International Conference on Fog and Mobile Edge Computing (FMEC 2025)", May 19-22, 2025, Tampa, Florida, USA **(Best Paper Award)**
 
 ---
 
-## Design Overview
+## Architecture
 
-### 🔑 RT 1.1 – Quote Enclave & Secure Channel
-- APP → (ATTEST → Enclave) via **Quote Enclave**, encrypted with `pk_QE` and signed by `sk_a`.
-- Accepted enclave receives `spk_a`, proposes symmetric key `K`.
-- `K` is transmitted back via enclave → APP.
-- APP and enclave establish a **per-app encrypted session** for inference inputs and outputs.
+Detailed design includes:
 
-### 🧠 RT 1.2 – Split Inference Architecture
-- **Input Enclave**: Decrypts and runs first layer(s). Protects original input confidentiality.
-- **Host (Middle Group)**: Untrusted execution of most layers in plaintext, minimizing enclave overhead.
-- **Output Enclave**: Final layers—including softmax/logit—encrypts final output to return to APP.
-- Even if multiple groups run outside enclaves, intermediate data cannot reconstruct inputs or outputs.
+1. **Input Enclave**: decrypts and processes input layers.
+2. **Middle Host Layer**: untrusted execution of intermediate layers.
+3. **Output Enclave**: final layers inside enclave, encrypts inference output.
+4. **Key Management & Secure Communication Protocol:**  ensure confidentiality between each app and enclave.
+
+This architecture ensures that no attacker observing inputs, intermediate data, or outputs can reconstruct the original inputs or outputs.
 
 ---
 
-## Implementation Details
+## Implementation
 
-#### 🧰 Native Mode (C/C++)
-- Translation of all layers into C/C++, compiled into Keystone enclaves.
-- Used for **MobileNetV1** (variants 0.7, 0.5, 0.25 width multipliers) in controlled enclave environment.
-
-#### 🧪 Hybrid Mode (Python + Enclave C/C++)
-- Hosts PyTorch and NumPy to support Python-native model implementations.
-- Only input/output enclaves require C/C++ translation.
-- Successfully applied to **MobileViT V1 XXS** (~1.3M parameters), with ~27% overhead.
+- **Native mode**: Entire inference pipeline translated into C/C++ and the input and output layers are executed inside Keystone enclaves—used for MobileNetV1 models.
+- **Hybrid mode**: Python (with PyTorch & NumPy) executes middle layers on host, while input/output enclaves use C/C++—used for MobileViT.\
+  This hybrid design allows easy adaptation to complex ODML models commonly implemented in Python.
 
 ---
 
-## Benchmark Results
+## Benchmarks
 
-Setup:
-- **Ubuntu VM (4 vCPUs, 16 GB RAM)** on Google Cloud.
-- Keystone system emulated via **QEMU** (2 GB RAM, 1 vCPU) to mimic edge hardware.
-- Evaluation on models with **224×224** input images.
+We evaluated on MobileNetV1 variants (width multipliers 0.7, 0.5, 0.25) and MobileViTV1‑XXS with input image size 224×224:
 
-| Model                | Inference Overhead vs Baseline |
-|----------------------|-------------------------------|
-| MobileNetV1‑0.7‑224  | ~71%                          |
-| MobileNetV1‑0.5‑224  | ~133%                         |
-| MobileNetV1‑0.25‑224 | ~430%                         |
-| MobileViT‑XXS        | ~27%                          |
+| Model                | Overhead vs Baseline |
+| -------------------- | -------------------- |
+| MobileNetV1‑0.7‑224  | \~71%                |
+| MobileNetV1‑0.5‑224  | \~133%               |
+| MobileNetV1‑0.25‑224 | \~430%               |
+| MobileViTV1‑XXS      | \~27%                |
 
-The hybrid split inference approach dramatically lowers overhead compared to the native mode and prior state-of-the-art solutions (142%–577%) without sacrificing confidentiality.
+Hybrid inference (MobileViT) achieves the lowest overhead while preserving strong security guarantees.
 
 ---
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/<your-github-org>/SplitInference.git
+git clone https://github.com/DrVoayger/SplitInference.git
 cd SplitInference
+# Follow `docs/INSTALL.md` for dependencies: QEMU, Keystone, Python toolchain
+# Build native enclave: compile input/output enclave in C/C++
+# Run hybrid version: port Python interpreter, PyTorch, Numpy into enclave workspace
+```
+
+Refer to `src/` for  setup instructions and code.
+
+---
+
+## Acknowledgements
+
+Special thanks to CAHSI and Google for funding this project.
+
+---
