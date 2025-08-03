@@ -1,6 +1,8 @@
 # SplitInference 🔐
 
-A research prototype for protecting inference confidentiality using a multi‑enclave split‑inference architecture over ODML models.
+Split Inference is designed to protect On-Device Machine Learning (ODML) models using Keystone, a RISC-V based multi‑enclave Trusted Execution Environment framework. It can prevent direct eavesdropping on and tampering with inference requests and inference responses during the model inference process. 
+
+We have implemented prototypes protecting MobileNet and MobileViT, two classes of ODML models. Our implementation has shown premium performance and can be generalized to other Python-implemented models.
 
 ## 🚀 Highlights
 
@@ -8,7 +10,7 @@ A research prototype for protecting inference confidentiality using a multi‑en
 - **Robust enclave-based key management:** Each app negotiates a unique encryption key with an Enclave using remote attestation, establishing per-app secure channels to enclaves.
 - **Native & Hybrid Implementations on Keystone:** We implemented native (C/C++) and hybrid (Python + enclave C/C++) versions for MobileNetV1 and MobileViT models within the Keystone RISC‑V multi‑enclave TEE.
 - **Strong performance:** Experimental evaluation shows inference overheads in the range of 27%–430%, significantly better than 142%–577% seen in prior work.
-- **Python-friendly:** The hybrid split inference architecture supports PyTorch and NumPy within the enclave, enabling seamless deployment of a wide range of ODML models implemented in Python.
+- **Generalized Solution:** The hybrid split inference architecture supports PyTorch and NumPy within the enclave, enabling seamless deployment of a wide range of ODML models implemented in Python.
 - **Peer-reviewed:** The prototype work received the **Best Paper Award** at FMEC 2025.
 
 ---
@@ -22,24 +24,25 @@ A research prototype for protecting inference confidentiality using a multi‑en
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Getting Started](#getting-started)
-- [Acknowledgements](#acknowledgements)
 
 ---
 
 ## 🏆 Publication 
 
-Yongzhi Wang, Ahsan Habib, "Protect Data Confidentiality for On-device Machine Learning through Split Inference", The 10th International Conference on Fog and Mobile Edge Computing (FMEC 2025), May 19-22, 2025, Tampa, Florida, USA **(Best Paper Award)** 🎉
+Yongzhi Wang, Ahsan Habib, "Protect Data Confidentiality for On-device Machine Learning through Split Inference", The 10th International Conference on Fog and Mobile Edge Computing (FMEC 2025), May 19-22, 2025, Tampa, Florida, USA **(Best Paper Award)** 🎉 [pdf](https://drvoyager.github.io/pdf/SplitInference_CameraReady.pdf)
 
 ---
 
 ## Architecture
 
+![Split Inference Architecture Diagram](./docs/architecture-diagram.png)
+
 Detailed design includes:
 
 1. **Input Enclave**: decrypts and processes input layers.
-2. **Middle Host Layer**: untrusted execution of intermediate layers.
+2. **Middle Group**: untrusted execution of intermediate layers.
 3. **Output Enclave**: final layers inside enclave, encrypts inference output.
-4. **Key Management & Secure Communication Protocol:**  ensure confidentiality between each app and enclave.
+4. **Key Management & Secure Communication Protocol:**  ensure confidentiality between each app and enclave through remote attestations.
 
 This architecture ensures that no attacker observing inputs, intermediate data, or outputs can reconstruct the original inputs or outputs.
 
@@ -78,12 +81,6 @@ cd SplitInference
 # Run hybrid version: port Python interpreter, PyTorch, Numpy into enclave workspace
 ```
 
-Refer to `src/` for  setup instructions and code.
-
----
-
-## Acknowledgements
-
-Special thanks to CAHSI and Google for funding this project.
+Refer to `src/` for instructions and the code.
 
 ---
