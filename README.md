@@ -15,12 +15,14 @@ A research prototype for protecting inference confidentiality using a multi‑en
 
 ## 📚 Table of Contents
 
-- [Background](#background)
+- [Highlights](#-highlights)
+- [Table of Contents](#-table-of-contents)
+- [Publication](#publication)
 - [Architecture](#architecture)
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Getting Started](#getting-started)
-- [License & Acknowledgements](#license--acknowledgements)
+
 
 ---
 
