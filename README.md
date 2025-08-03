@@ -1,4 +1,4 @@
-# SplitInference 🔐
+# Split Inference 🔐
 
 Split Inference is designed to protect On-Device Machine Learning (ODML) models using Keystone, a RISC-V based multi‑enclave Trusted Execution Environment framework. It can prevent direct eavesdropping on and tampering with inference requests and inference responses during the model inference process. 
 
