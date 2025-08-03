@@ -22,13 +22,13 @@ A research prototype for protecting inference confidentiality using a multi‑en
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Getting Started](#getting-started)
-
+- [Acknowledgements](#acknowledgements)
 
 ---
 
-## Publication
+## 🏆 Publication 
 
-Yongzhi Wang, Ahsan Habib, "Protect Data Confidentiality for On-device Machine Learning through Split Inference", The 10th International Conference on Fog and Mobile Edge Computing (FMEC 2025)", May 19-22, 2025, Tampa, Florida, USA **(Best Paper Award)**
+Yongzhi Wang, Ahsan Habib, "Protect Data Confidentiality for On-device Machine Learning through Split Inference", The 10th International Conference on Fog and Mobile Edge Computing (FMEC 2025), May 19-22, 2025, Tampa, Florida, USA **(Best Paper Award)** 🎉
 
 ---
 
